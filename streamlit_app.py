@@ -29,18 +29,16 @@ st.dataframe(sales_by_month)
 # Here the grouped months are the index and automatically used for the x axis
 st.line_chart(sales_by_month, y="Sales")
 
-st.write("## Your additions")
-
 # (1) Add a drop-down for Category
 categories = df['Category'].unique()
 selected_category = st.selectbox("Select Category", categories)
 
 # (2) Add a multi-select for Sub_Category in the selected Category
-sub_categories = df[df['Category'] == selected_category]['Sub-Category'].unique()
+sub_categories = df[df['Category'] == selected_category]['Sub_Category'].unique()
 selected_sub_categories = st.multiselect("Select Sub-Categories", sub_categories)
 
 # (3) Show a line chart of sales for the selected items in (2)
-filtered_df = df[df['Sub-Category'].isin(selected_sub_categories)]
+filtered_df = df[df['Sub_Category'].isin(selected_sub_categories)]
 sales_by_month_filtered = filtered_df.groupby(pd.Grouper(freq='M')).sum()['Sales']
 st.line_chart(sales_by_month_filtered, y="Sales")
 
