@@ -30,8 +30,34 @@ st.dataframe(sales_by_month)
 st.line_chart(sales_by_month, y="Sales")
 
 st.write("## Your additions")
-st.write("### (1) add a drop down for Category (https://docs.streamlit.io/library/api-reference/widgets/st.selectbox)")
-st.write("### (2) add a multi-select for Sub_Category *in the selected Category (1)* (https://docs.streamlit.io/library/api-reference/widgets/st.multiselect)")
-st.write("### (3) show a line chart of sales for the selected items in (2)")
-st.write("### (4) show three metrics (https://docs.streamlit.io/library/api-reference/data/st.metric) for the selected items in (2): total sales, total profit, and overall profit margin (%)")
-st.write("### (5) use the delta option in the overall profit margin metric to show the difference between the overall average profit margin (all products across all categories)")
+
+# (1) Add a drop-down for Category
+categories = df['Category'].unique()
+selected_category = st.selectbox("Select Category", categories)
+
+# (2) Add a multi-select for Sub_Category in the selected Category
+sub_categories = df[df['Category'] == selected_category]['Sub-Category'].unique()
+selected_sub_categories = st.multiselect("Select Sub-Categories", sub_categories)
+
+# (3) Show a line chart of sales for the selected items in (2)
+filtered_df = df[df['Sub-Category'].isin(selected_sub_categories)]
+sales_by_month_filtered = filtered_df.groupby(pd.Grouper(freq='M')).sum()['Sales']
+st.line_chart(sales_by_month_filtered, y="Sales")
+
+# (4) Show three metrics for the selected items in (2)
+total_sales = filtered_df['Sales'].sum()
+total_profit = filtered_df['Profit'].sum()
+overall_profit_margin = (total_profit / total_sales) * 100 if total_sales != 0 else 0
+
+st.metric(label="Total Sales", value=f"${total_sales:,.2f}")
+st.metric(label="Total Profit", value=f"${total_profit:,.2f}")
+st.metric(label="Overall Profit Margin (%)", value=f"{overall_profit_margin:.2f}%")
+
+# (5) Use the delta option in the overall profit margin metric to show the difference between the overall average profit margin (all products across all categories)
+total_sales_all = df['Sales'].sum()
+total_profit_all = df['Profit'].sum()
+overall_profit_margin_all = (total_profit_all / total_sales_all) * 100 if total_sales_all != 0 else 0
+
+profit_margin_delta = overall_profit_margin - overall_profit_margin_all
+
+st.metric(label="Overall Profit Margin (%)", value=f"{overall_profit_margin:.2f}%", delta=f"{profit_margin_delta:.2f}%")
